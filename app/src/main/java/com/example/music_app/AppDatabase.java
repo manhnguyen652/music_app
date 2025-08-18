@@ -18,8 +18,9 @@ import com.example.music_app.entity.SongFavorite;
 import com.example.music_app.entity.User;
 import com.example.music_app.entity.Group;
 import com.example.music_app.entity.GroupMember;
+import com.example.music_app.entity.GroupSong;
 
-@Database(entities = {User.class, Song.class , PlayList.class, PlayListSong.class , SongFavorite.class, Group.class, GroupMember.class}, version = 2)
+@Database(entities = {User.class, Song.class , PlayList.class, PlayListSong.class , SongFavorite.class, Group.class, GroupMember.class, GroupSong.class}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 

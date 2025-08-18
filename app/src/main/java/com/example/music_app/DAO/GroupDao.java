@@ -6,6 +6,7 @@ import androidx.room.Query;
 
 import com.example.music_app.entity.Group;
 import com.example.music_app.entity.GroupMember;
+import com.example.music_app.entity.GroupSong;
 
 import java.util.List;
 
@@ -31,5 +32,18 @@ public interface GroupDao {
 
     @Query("SELECT u.username FROM group_members m JOIN users u ON u.username = m.username WHERE m.group_id = :groupId")
     List<String> listMemberUsernames(int groupId);
+
+    // Group playlist operations
+    @Insert
+    void insertGroupSong(GroupSong groupSong);
+
+    @Query("DELETE FROM group_songs WHERE group_id = :groupId AND song_path = :songPath")
+    void deleteGroupSong(int groupId, String songPath);
+
+    @Query("SELECT COUNT(*) FROM group_songs WHERE group_id = :groupId AND song_path = :songPath")
+    int countSongInGroup(int groupId, String songPath);
+
+    @Query("SELECT s.* FROM group_songs gs JOIN songs s ON s.path = gs.song_path WHERE gs.group_id = :groupId ORDER BY gs.id DESC")
+    List<com.example.music_app.entity.Song> getSongsInGroup(int groupId);
 }
 
