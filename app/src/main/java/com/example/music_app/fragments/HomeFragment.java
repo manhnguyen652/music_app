@@ -1,0 +1,181 @@
+package com.example.music_app.fragments;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.music_app.Adapter.HorizontalSongAdapter;
+import com.example.music_app.AppDatabase;
+import com.example.music_app.R;
+import com.example.music_app.entity.Song;
+import com.example.music_app.utils.SongUtils;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class HomeFragment extends Fragment {
+
+    private RecyclerView recyclerHotSongs, recyclerLatestSongs, recyclerFavoriteSongs;
+    private ProgressBar progressBar;
+    private Button btnOnline, btnOffline;
+
+    private List<Song> allSongs = new ArrayList<>();
+    private List<Song> hotSongs = new ArrayList<>();
+    private List<Song> newSongs = new ArrayList<>();
+    private List<Song> favoriteSongs = new ArrayList<>();
+
+    private String currentSource = "";
+    private boolean isFirstLoad = true;
+
+    private Context context;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        context = requireContext();
+
+        recyclerHotSongs = view.findViewById(R.id.recyclerHotSongs);
+        recyclerLatestSongs = view.findViewById(R.id.recyclerLatestSongs);
+        recyclerFavoriteSongs = view.findViewById(R.id.recyclerFavoriteSongs);
+        progressBar = view.findViewById(R.id.progressBar);
+        btnOnline = view.findViewById(R.id.btnOnline);
+        btnOffline = view.findViewById(R.id.btnOffline);
+
+        btnOffline.setOnClickListener(v -> {
+            if (!currentSource.equals("offline")) {
+                currentSource = "offline";
+                saveCurrentSource("offline");
+                Snackbar.make(view, "Đang tải nhạc từ thiết bị", Snackbar.LENGTH_SHORT).show();
+                loadSongsFromDevice();
+            }
+        });
+
+        btnOnline.setOnClickListener(v -> {
+            if (!isOnline()) {
+                Snackbar.make(view, "Không có kết nối Internet", Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+            if (!currentSource.equals("online")) {
+                currentSource = "online";
+                saveCurrentSource("online");
+                Snackbar.make(view, "Đang tải nhạc online...", Snackbar.LENGTH_SHORT).show();
+                loadSongsFromApi();
+            }
+        });
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isFirstLoad) {
+            isFirstLoad = false;
+            currentSource = getSavedSource();
+            loadCachedOrDefault();
+        } else {
+            updateSongList(allSongs);
+        }
+    }
+
+    private void loadCachedOrDefault() {
+        progressBar.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getInstance(context);
+            List<Song> cachedSongs = db.songDao().getAllSongs();
+            requireActivity().runOnUiThread(() -> {
+                if (cachedSongs.isEmpty()) {
+                    currentSource = "offline";
+                    saveCurrentSource("offline");
+                    loadSongsFromDevice();
+                } else {
+                    allSongs = cachedSongs;
+                    updateSongList(allSongs);
+                }
+                progressBar.setVisibility(View.GONE);
+            });
+        }).start();
+    }
+
+    private void saveCurrentSource(String source) {
+        SharedPreferences prefs = context.getSharedPreferences("SongPrefs", Context.MODE_PRIVATE);
+        prefs.edit().putString("currentSource", source).apply();
+    }
+
+    private String getSavedSource() {
+        SharedPreferences prefs = context.getSharedPreferences("SongPrefs", Context.MODE_PRIVATE);
+        return prefs.getString("currentSource", "offline");
+    }
+
+    private void loadSongsFromDevice() {
+        progressBar.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            List<Song> songs = SongUtils.getAllSongsFromDevice(context);
+            AppDatabase db = AppDatabase.getInstance(context);
+            db.songDao().deleteAll();
+            db.songDao().insertAll(songs);
+
+            requireActivity().runOnUiThread(() -> {
+                allSongs = songs;
+                updateSongList(allSongs);
+                progressBar.setVisibility(View.GONE);
+            });
+        }).start();
+    }
+
+    private void loadSongsFromApi() {
+        progressBar.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            List<Song> songs = SongUtils.getAllSongsFromJamendo();
+            AppDatabase db = AppDatabase.getInstance(context);
+            db.songDao().deleteAll();
+            db.songDao().insertAll(songs);
+
+            requireActivity().runOnUiThread(() -> {
+                allSongs = songs;
+                updateSongList(allSongs);
+                progressBar.setVisibility(View.GONE);
+            });
+        }).start();
+    }
+
+    private void updateSongList(List<Song> songs) {
+        if (songs == null) return;
+
+        hotSongs = SongUtils.getTopPlayedSongs(context);
+        newSongs = SongUtils.getLatestSongs(songs);
+        favoriteSongs = SongUtils.getFavoriteList(context);
+
+        recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerHotSongs.setAdapter(new HorizontalSongAdapter(hotSongs, context));
+
+        recyclerLatestSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerLatestSongs.setAdapter(new HorizontalSongAdapter(newSongs, context));
+
+        recyclerFavoriteSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerFavoriteSongs.setAdapter(new HorizontalSongAdapter(favoriteSongs, context));
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnected();
+    }
+}
