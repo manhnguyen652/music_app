@@ -149,11 +149,22 @@ public class PlayerActivity extends AppCompatActivity {
 		});
 
 		btnAddToPlayList.setOnClickListener(v -> {
-			if (songList != null && !songList.isEmpty()) {
-				Song currentSong = songList.get(currentIndex);
-				showSelectPlaylistDialog(currentSong);
-			} else {
+			if (songList == null || songList.isEmpty()) {
 				Toast.makeText(context, "Không tìm thấy bài hát", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			Song currentSong = songList.get(currentIndex);
+			if (activeGroupId != null) {
+				AppDatabase db = AppDatabase.getInstance(context);
+				com.example.music_app.DAO.GroupDao gdao = db.groupDao();
+				if (gdao.countSongInGroup(activeGroupId, currentSong.getPath()) == 0) {
+					gdao.insertGroupSong(new com.example.music_app.entity.GroupSong(activeGroupId, currentSong.getPath()));
+					Snackbar.make(v, "Đã thêm vào danh sách nhóm", Snackbar.LENGTH_SHORT).show();
+				} else {
+					Snackbar.make(v, "Bài hát đã có trong danh sách nhóm", Snackbar.LENGTH_SHORT).show();
+				}
+			} else {
+				showSelectPlaylistDialog(currentSong);
 			}
 		});
 

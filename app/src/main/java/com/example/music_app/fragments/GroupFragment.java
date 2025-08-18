@@ -93,6 +93,7 @@ public class GroupFragment extends Fragment {
         TextView name = item.findViewById(R.id.group_name);
         TextView code = item.findViewById(R.id.group_code);
         Button activate = item.findViewById(R.id.btn_activate_group);
+        Button open = item.findViewById(R.id.btn_open_group);
 
         name.setText(group.name + (isOwner ? " (Owner)" : ""));
         code.setText(getString(R.string.label_invite_code, group.inviteCode));
@@ -100,6 +101,11 @@ public class GroupFragment extends Fragment {
         activate.setOnClickListener(v -> {
             SessionManager sm = new SessionManager(requireContext());
             sm.setActiveGroupId(group.id);
+        });
+        open.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(requireContext(), com.example.music_app.GroupDetailActivity.class);
+            intent.putExtra("group_id", group.id);
+            startActivity(intent);
         });
         return item;
     }
