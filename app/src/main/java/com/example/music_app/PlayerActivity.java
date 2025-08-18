@@ -154,18 +154,7 @@ public class PlayerActivity extends AppCompatActivity {
 				return;
 			}
 			Song currentSong = songList.get(currentIndex);
-			if (activeGroupId != null) {
-				AppDatabase db = AppDatabase.getInstance(context);
-				com.example.music_app.DAO.GroupDao gdao = db.groupDao();
-				if (gdao.countSongInGroup(activeGroupId, currentSong.getPath()) == 0) {
-					gdao.insertGroupSong(new com.example.music_app.entity.GroupSong(activeGroupId, currentSong.getPath()));
-					Snackbar.make(v, "Đã thêm vào danh sách nhóm", Snackbar.LENGTH_SHORT).show();
-				} else {
-					Snackbar.make(v, "Bài hát đã có trong danh sách nhóm", Snackbar.LENGTH_SHORT).show();
-				}
-			} else {
-				showSelectPlaylistDialog(currentSong);
-			}
+			showAddOptions(currentSong);
 		});
 
 		seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -233,6 +222,61 @@ public class PlayerActivity extends AppCompatActivity {
 						.show();
 			});
 		}).start();
+	}
+
+	private void showAddOptions(Song song) {
+		CharSequence[] options = new CharSequence[]{"Playlist cá nhân", "Nhóm"};
+		new AlertDialog.Builder(context)
+				.setTitle("Thêm vào")
+				.setItems(options, (dialog, which) -> {
+					if (which == 0) {
+						showSelectPlaylistDialog(song);
+					} else {
+						showSelectGroupDialog(song);
+					}
+				})
+				.setNegativeButton("Hủy", null)
+				.show();
+	}
+
+	private void showSelectGroupDialog(Song song) {
+		SessionManager sessionManager = new SessionManager(this);
+		String currentUser = sessionManager.getUsername();
+		AppDatabase db = AppDatabase.getInstance(context);
+		com.example.music_app.DAO.GroupDao gdao = db.groupDao();
+		java.util.List<com.example.music_app.entity.Group> owned = gdao.getGroupsOwnedBy(currentUser);
+		java.util.List<com.example.music_app.entity.Group> joined = gdao.getGroupsJoinedBy(currentUser);
+		java.util.List<com.example.music_app.entity.Group> all = new java.util.ArrayList<>();
+		all.addAll(owned);
+		for (com.example.music_app.entity.Group g : joined) {
+			boolean exists = false;
+			for (com.example.music_app.entity.Group og : owned) { if (og.id == g.id) { exists = true; break; } }
+			if (!exists) all.add(g);
+		}
+		if (all.isEmpty()) {
+			Toast.makeText(context, "Bạn chưa có/tham gia nhóm nào", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		CharSequence[] names = new CharSequence[all.size()];
+		for (int i = 0; i < all.size(); i++) {
+			com.example.music_app.entity.Group g = all.get(i);
+			boolean isOwner = false;
+			for (com.example.music_app.entity.Group og : owned) { if (og.id == g.id) { isOwner = true; break; } }
+			names[i] = g.name + (isOwner ? " (Owner)" : "");
+		}
+		new AlertDialog.Builder(context)
+				.setTitle("Chọn nhóm")
+				.setItems(names, (dialog, which) -> {
+					com.example.music_app.entity.Group selected = all.get(which);
+					if (gdao.countSongInGroup(selected.id, song.getPath()) == 0) {
+						gdao.insertGroupSong(new com.example.music_app.entity.GroupSong(selected.id, song.getPath()));
+						Snackbar.make(findViewById(android.R.id.content), "Đã thêm vào danh sách nhóm", Snackbar.LENGTH_SHORT).show();
+					} else {
+						Snackbar.make(findViewById(android.R.id.content), "Bài hát đã có trong nhóm", Snackbar.LENGTH_SHORT).show();
+					}
+				})
+				.setNegativeButton("Hủy", null)
+				.show();
 	}
 
 

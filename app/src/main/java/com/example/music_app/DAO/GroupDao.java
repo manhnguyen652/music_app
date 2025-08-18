@@ -27,6 +27,9 @@ public interface GroupDao {
     @Query("SELECT * FROM groups WHERE invite_code = :inviteCode LIMIT 1")
     Group getGroupByInviteCode(String inviteCode);
 
+    @Query("SELECT * FROM groups WHERE id = :groupId LIMIT 1")
+    Group getGroupById(int groupId);
+
     @Query("SELECT COUNT(*) FROM group_members WHERE group_id = :groupId AND username = :username")
     int isMember(int groupId, String username);
 

@@ -5,23 +5,53 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/btn_play_all"
+    <TextView
+        android:id="@+id/tv_group_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Phát tất cả" />
-
-    <Button
-        android:id="@+id/btn_add_song"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Thêm bài hát" />
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:text="Danh sách nhóm" />
 
     <LinearLayout
-        android:id="@+id/group_song_list"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btn_play_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phát tất cả" />
+
+        <View
+            android:layout_width="12dp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/btn_add_song"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm bài hát" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:id="@+id/group_song_list"
+            android:orientation="vertical"
+            android:divider="@android:color/darker_gray"
+            android:showDividers="middle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </ScrollView>
 
 </LinearLayout>
 

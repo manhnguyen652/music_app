@@ -38,6 +38,9 @@ public class GroupDetailActivity extends AppCompatActivity {
         listContainer = findViewById(R.id.group_song_list);
         btnPlayAll = findViewById(R.id.btn_play_all);
         btnAddSong = findViewById(R.id.btn_add_song);
+        TextView title = findViewById(R.id.tv_group_title);
+        com.example.music_app.entity.Group g = AppDatabase.getInstance(this).groupDao().getGroupById(groupId);
+        if (g != null) title.setText("Nhóm: " + g.name + "  (" + g.inviteCode + ")");
 
         refreshSongs();
 
