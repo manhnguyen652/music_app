@@ -13,6 +13,10 @@
         android:title="PLAYLIST"
         android:icon="@drawable/ic_playlist"/>
     <item
+        android:id="@+id/nav_group"
+        android:title="GROUP"
+        android:icon="@drawable/ic_group"/>
+    <item
         android:id="@+id/nav_account"
         android:title="ACCOUNT"
         android:icon="@drawable/ic_account"

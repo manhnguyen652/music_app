@@ -30,6 +30,7 @@ import com.example.music_app.entity.Song;
 import com.example.music_app.fragments.AccountFragment;
 import com.example.music_app.fragments.HomeFragment;
 import com.example.music_app.fragments.PlayListFragment;
+import com.example.music_app.fragments.GroupFragment;
 import com.example.music_app.fragments.SearchFragment;
 import com.example.music_app.utils.SongUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -74,6 +75,13 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }else {
                     selectedFragment = new PlayListFragment();
+                }
+            } else if (id == R.id.nav_group) {
+                if(!sessionManager.isLoggedIn()){
+                    Snackbar.make(rootView, "Bạn chưa đăng nhập", Snackbar.LENGTH_SHORT).show();
+                    return false;
+                } else {
+                    selectedFragment = new GroupFragment();
                 }
             }
             else if (id == R.id.nav_account) {
