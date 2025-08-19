@@ -158,19 +158,28 @@ public class HomeFragment extends Fragment {
 
     private void updateSongList(List<Song> songs) {
         if (songs == null) return;
+        progressBar.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            List<Song> top = SongUtils.getTopPlayedSongs(context);
+            List<Song> latest = SongUtils.getLatestSongs(songs);
+            List<Song> fav = SongUtils.getFavoriteList(context);
 
-        hotSongs = SongUtils.getTopPlayedSongs(context);
-        newSongs = SongUtils.getLatestSongs(songs);
-        favoriteSongs = SongUtils.getFavoriteList(context);
+            requireActivity().runOnUiThread(() -> {
+                hotSongs = top;
+                newSongs = latest;
+                favoriteSongs = fav;
 
-        recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-        recyclerHotSongs.setAdapter(new HorizontalSongAdapter(hotSongs, context));
+                recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+                recyclerHotSongs.setAdapter(new HorizontalSongAdapter(hotSongs, context));
 
-        recyclerLatestSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-        recyclerLatestSongs.setAdapter(new HorizontalSongAdapter(newSongs, context));
+                recyclerLatestSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+                recyclerLatestSongs.setAdapter(new HorizontalSongAdapter(newSongs, context));
 
-        recyclerFavoriteSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-        recyclerFavoriteSongs.setAdapter(new HorizontalSongAdapter(favoriteSongs, context));
+                recyclerFavoriteSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+                recyclerFavoriteSongs.setAdapter(new HorizontalSongAdapter(favoriteSongs, context));
+                progressBar.setVisibility(View.GONE);
+            });
+        }).start();
     }
 
     private boolean isOnline() {
