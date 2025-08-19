@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#D88C52">
 
     <LinearLayout
         android:orientation="vertical"
@@ -15,19 +16,25 @@
             android:text="Quản lý nhóm"
             android:textStyle="bold"
             android:textSize="20sp"
+            android:textColor="#FFFFFF"
             android:layout_marginBottom="8dp"/>
 
         <EditText
             android:id="@+id/input_group_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Tên nhóm" />
+            android:hint="Tên nhóm"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#EEEEEE"
+            android:backgroundTint="@color/white" />
 
         <Button
             android:id="@+id/btn_create_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tạo nhóm" />
+            android:text="Tạo nhóm"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#907967" />
 
         <View
             android:layout_width="match_parent"
@@ -37,13 +44,18 @@
             android:id="@+id/input_invite_code"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Mã mời" />
+            android:hint="Mã mời"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#EEEEEE"
+            android:backgroundTint="@color/white" />
 
         <Button
             android:id="@+id/btn_join_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tham gia nhóm" />
+            android:text="Tham gia nhóm"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#388E3C" />
 
         <View
             android:layout_width="match_parent"

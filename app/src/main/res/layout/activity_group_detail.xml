@@ -3,7 +3,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#D88C52">
 
     <TextView
         android:id="@+id/tv_group_title"
@@ -11,7 +12,8 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:text="Danh sách nhóm" />
+        android:text="Danh sách nhóm"
+        android:textColor="#FFFFFF" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -23,7 +25,9 @@
             android:id="@+id/btn_play_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Phát tất cả" />
+            android:text="Phát tất cả"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#907967" />
 
         <View
             android:layout_width="12dp"
@@ -33,7 +37,9 @@
             android:id="@+id/btn_add_song"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thêm bài hát" />
+            android:text="Thêm bài hát"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#388E3C" />
     </LinearLayout>
 
     <View
