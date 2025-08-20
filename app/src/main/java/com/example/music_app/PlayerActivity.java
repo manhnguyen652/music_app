@@ -309,8 +309,26 @@ public class PlayerActivity extends AppCompatActivity {
 			} else {
 				mediaPlayer.setDataSource(context, Uri.parse(songPath));
 			}
-			mediaPlayer.prepare();
-			mediaPlayer.start();
+			mediaPlayer.setOnPreparedListener(mp -> {
+				mp.start();
+				NotificationReceiver.mediaPlayer = mediaPlayer;
+				NotificationReceiver.playerActivity = this;
+				seekBar.setMax(mediaPlayer.getDuration());
+				tvDuration.setText(formatTime(mediaPlayer.getDuration()));
+				handler.removeCallbacks(updateSeekBar);
+				updateSeekBar = new Runnable() {
+					@Override
+					public void run() {
+						if (mediaPlayer != null) {
+							seekBar.setProgress(mediaPlayer.getCurrentPosition());
+							tvCurrentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
+							handler.postDelayed(this, 500);
+						}
+					}
+				};
+				handler.post(updateSeekBar);
+			});
+			mediaPlayer.prepareAsync();
 			mediaPlayer.setOnCompletionListener(mp -> {
 				if (!isLooping) {
 					int nextIndex = (currentIndex + 1) % songList.size();
@@ -321,25 +339,6 @@ public class PlayerActivity extends AppCompatActivity {
 					mediaPlayer.start();
 				}
 			});
-
-			NotificationReceiver.mediaPlayer = mediaPlayer;
-			NotificationReceiver.playerActivity = this;
-
-			seekBar.setMax(mediaPlayer.getDuration());
-			tvDuration.setText(formatTime(mediaPlayer.getDuration()));
-
-			handler.removeCallbacks(updateSeekBar);
-			updateSeekBar = new Runnable() {
-				@Override
-				public void run() {
-					if (mediaPlayer != null) {
-						seekBar.setProgress(mediaPlayer.getCurrentPosition());
-						tvCurrentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
-						handler.postDelayed(this, 500);
-					}
-				}
-			};
-			handler.post(updateSeekBar);
 
 			displaySongImage();
 			showNotification();
@@ -369,13 +368,6 @@ public class PlayerActivity extends AppCompatActivity {
 		mediaPlayer = new MediaPlayer();
 		try {
 			mediaPlayer.setDataSource(songPath);
-			mediaPlayer.prepare();
-			mediaPlayer.start();
-			AppDatabase db = AppDatabase.getInstance(this);
-			SongDao songDao = db.songDao();
-			songDao.increasePlayCount(songPath);
-			NotificationReceiver.mediaPlayer = mediaPlayer;
-			NotificationReceiver.playerActivity = this;
 			mediaPlayer.setOnCompletionListener(mp -> {
 				if (!isLooping) {
 					int nextIndex = (currentIndex + 1) % songList.size();
@@ -387,20 +379,30 @@ public class PlayerActivity extends AppCompatActivity {
 				}
 			});
 
-			seekBar.setMax(mediaPlayer.getDuration());
-			tvDuration.setText(formatTime(mediaPlayer.getDuration()));
-
-			updateSeekBar = new Runnable() {
-				@Override
-				public void run() {
-					if (mediaPlayer != null) {
-						seekBar.setProgress(mediaPlayer.getCurrentPosition());
-						tvCurrentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
-						handler.postDelayed(this, 500);
+			mediaPlayer.setOnPreparedListener(mp -> {
+				mp.start();
+				NotificationReceiver.mediaPlayer = mediaPlayer;
+				NotificationReceiver.playerActivity = this;
+				seekBar.setMax(mediaPlayer.getDuration());
+				tvDuration.setText(formatTime(mediaPlayer.getDuration()));
+				updateSeekBar = new Runnable() {
+					@Override
+					public void run() {
+						if (mediaPlayer != null) {
+							seekBar.setProgress(mediaPlayer.getCurrentPosition());
+							tvCurrentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
+							handler.postDelayed(this, 500);
+						}
 					}
-				}
-			};
-			handler.post(updateSeekBar);
+				};
+				handler.post(updateSeekBar);
+				new Thread(() -> {
+					AppDatabase db = AppDatabase.getInstance(this);
+					SongDao songDao = db.songDao();
+					songDao.increasePlayCount(songPath);
+				}).start();
+			});
+			mediaPlayer.prepareAsync();
 
 		} catch (IOException e) {
 			e.printStackTrace();

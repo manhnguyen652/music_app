@@ -49,70 +49,85 @@ public class GroupDetailActivity extends AppCompatActivity {
     }
 
     private void refreshSongs() {
-        listContainer.removeAllViews();
-        GroupDao dao = AppDatabase.getInstance(this).groupDao();
-        List<Song> songs = dao.getSongsInGroup(groupId);
-        for (int i = 0; i < songs.size(); i++) {
-            int index = i;
-            Song s = songs.get(i);
-            View item = getLayoutInflater().inflate(R.layout.item_group_song, listContainer, false);
-            TextView title = item.findViewById(R.id.tv_song_title);
-            TextView artist = item.findViewById(R.id.tv_song_artist);
-            ImageView btnDelete = item.findViewById(R.id.btn_delete);
-            Button btnPlay = item.findViewById(R.id.btn_play);
+        new Thread(() -> {
+            GroupDao dao = AppDatabase.getInstance(this).groupDao();
+            List<Song> songs = dao.getSongsInGroup(groupId);
+            runOnUiThread(() -> {
+                listContainer.removeAllViews();
+                for (int i = 0; i < songs.size(); i++) {
+                    int index = i;
+                    Song s = songs.get(i);
+                    View item = getLayoutInflater().inflate(R.layout.item_group_song, listContainer, false);
+                    TextView title = item.findViewById(R.id.tv_song_title);
+                    TextView artist = item.findViewById(R.id.tv_song_artist);
+                    ImageView btnDelete = item.findViewById(R.id.btn_delete);
+                    Button btnPlay = item.findViewById(R.id.btn_play);
 
-            title.setText(s.getTitle());
-            artist.setText(s.getArtist());
+                    title.setText(s.getTitle());
+                    artist.setText(s.getArtist());
 
-            btnPlay.setOnClickListener(v -> playFromGroup(index));
-            btnDelete.setOnClickListener(v -> {
-                dao.deleteGroupSong(groupId, s.getPath());
-                refreshSongs();
+                    btnPlay.setOnClickListener(v -> playFromGroup(index));
+                    btnDelete.setOnClickListener(v -> {
+                        new Thread(() -> {
+                            dao.deleteGroupSong(groupId, s.getPath());
+                            runOnUiThread(this::refreshSongs);
+                        }).start();
+                    });
+
+                    listContainer.addView(item);
+                }
             });
-
-            listContainer.addView(item);
-        }
+        }).start();
     }
 
     private void onAddSongClicked(View v) {
-        GroupDao gdao = AppDatabase.getInstance(this).groupDao();
-        List<Song> allSongs = AppDatabase.getInstance(this).songDao().getAllSongs();
-        if (allSongs == null) allSongs = new ArrayList<>();
-        CharSequence[] titles = new CharSequence[allSongs.size()];
-        for (int i = 0; i < allSongs.size(); i++) {
-            Song s = allSongs.get(i);
-            titles[i] = (s.getTitle() != null ? s.getTitle() : s.getPath());
-        }
-
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Chọn bài hát để thêm")
-                .setItems(titles, (dialog, which) -> {
-                    Song chosen = allSongs.get(which);
-                    if (gdao.countSongInGroup(groupId, chosen.getPath()) == 0) {
-                        gdao.insertGroupSong(new GroupSong(groupId, chosen.getPath()));
-                        refreshSongs();
-                        Toast.makeText(this, "Đã thêm vào danh sách nhóm", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Bài hát đã tồn tại", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
+        new Thread(() -> {
+            GroupDao gdao = AppDatabase.getInstance(this).groupDao();
+            List<Song> allSongs = AppDatabase.getInstance(this).songDao().getAllSongs();
+            if (allSongs == null) allSongs = new ArrayList<>();
+            CharSequence[] titles = new CharSequence[allSongs.size()];
+            for (int i = 0; i < allSongs.size(); i++) {
+                Song s = allSongs.get(i);
+                titles[i] = (s.getTitle() != null ? s.getTitle() : s.getPath());
+            }
+            List<Song> finalAllSongs = allSongs;
+            runOnUiThread(() -> new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Chọn bài hát để thêm")
+                    .setItems(titles, (dialog, which) -> {
+                        Song chosen = finalAllSongs.get(which);
+                        new Thread(() -> {
+                            if (gdao.countSongInGroup(groupId, chosen.getPath()) == 0) {
+                                gdao.insertGroupSong(new GroupSong(groupId, chosen.getPath()));
+                                runOnUiThread(() -> {
+                                    refreshSongs();
+                                    Toast.makeText(this, "Đã thêm vào danh sách nhóm", Toast.LENGTH_SHORT).show();
+                                });
+                            } else {
+                                runOnUiThread(() -> Toast.makeText(this, "Bài hát đã tồn tại", Toast.LENGTH_SHORT).show());
+                            }
+                        }).start();
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show());
+        }).start();
     }
 
     private void playFromGroup(int index) {
-        GroupDao dao = AppDatabase.getInstance(this).groupDao();
-        List<Song> songs = dao.getSongsInGroup(groupId);
-        if (songs.isEmpty()) {
-            Toast.makeText(this, "Danh sách trống", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Intent intent = new Intent(this, PlayerActivity.class);
-        intent.putExtra("song_list", new Gson().toJson(songs));
-        intent.putExtra("current_index", index);
-        intent.putExtra("song_path", songs.get(index).getPath());
-        intent.putExtra("song_artist", songs.get(index).getArtist());
-        startActivity(intent);
+        new Thread(() -> {
+            GroupDao dao = AppDatabase.getInstance(this).groupDao();
+            List<Song> songs = dao.getSongsInGroup(groupId);
+            runOnUiThread(() -> {
+                if (songs.isEmpty()) {
+                    Toast.makeText(this, "Danh sách trống", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent intent = new Intent(this, PlayerActivity.class);
+                intent.putExtra("song_list", new Gson().toJson(songs));
+                intent.putExtra("current_index", index);
+                intent.putExtra("song_path", songs.get(index).getPath());
+                intent.putExtra("song_artist", songs.get(index).getArtist());
+                startActivity(intent);
+            });
+        }).start();
     }
 }
-
