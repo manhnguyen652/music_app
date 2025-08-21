@@ -28,25 +28,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="#000000" />
             <TextView
                 android:id="@+id/group_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textColor="#444444" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btn_activate_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Kích hoạt" />
+            android:text="Kích hoạt"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#907967" />
 
         <Button
             android:id="@+id/btn_open_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mở" />
+            android:text="Mở"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#388E3C" />
     </LinearLayout>
 
 </LinearLayout>
