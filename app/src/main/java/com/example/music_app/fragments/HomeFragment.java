@@ -44,6 +44,10 @@ public class HomeFragment extends Fragment {
 
     private Context context;
 
+    private HorizontalSongAdapter hotAdapter;
+    private HorizontalSongAdapter latestAdapter;
+    private HorizontalSongAdapter favoriteAdapter;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -57,6 +61,25 @@ public class HomeFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
         btnOnline = view.findViewById(R.id.btnOnline);
         btnOffline = view.findViewById(R.id.btnOffline);
+
+        // Init RecyclerViews once
+        recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerHotSongs.setHasFixedSize(true);
+        recyclerHotSongs.setItemViewCacheSize(20);
+        hotAdapter = new HorizontalSongAdapter(hotSongs, context);
+        recyclerHotSongs.setAdapter(hotAdapter);
+
+        recyclerLatestSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerLatestSongs.setHasFixedSize(true);
+        recyclerLatestSongs.setItemViewCacheSize(20);
+        latestAdapter = new HorizontalSongAdapter(newSongs, context);
+        recyclerLatestSongs.setAdapter(latestAdapter);
+
+        recyclerFavoriteSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerFavoriteSongs.setHasFixedSize(true);
+        recyclerFavoriteSongs.setItemViewCacheSize(20);
+        favoriteAdapter = new HorizontalSongAdapter(favoriteSongs, context);
+        recyclerFavoriteSongs.setAdapter(favoriteAdapter);
 
         btnOffline.setOnClickListener(v -> {
             if (!currentSource.equals("offline")) {
@@ -100,7 +123,8 @@ public class HomeFragment extends Fragment {
         new Thread(() -> {
             AppDatabase db = AppDatabase.getInstance(context);
             List<Song> cachedSongs = db.songDao().getAllSongs();
-            requireActivity().runOnUiThread(() -> {
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
                 if (cachedSongs.isEmpty()) {
                     currentSource = "offline";
                     saveCurrentSource("offline");
@@ -132,7 +156,8 @@ public class HomeFragment extends Fragment {
             db.songDao().deleteAll();
             db.songDao().insertAll(songs);
 
-            requireActivity().runOnUiThread(() -> {
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
                 allSongs = songs;
                 updateSongList(allSongs);
                 progressBar.setVisibility(View.GONE);
@@ -148,7 +173,8 @@ public class HomeFragment extends Fragment {
             db.songDao().deleteAll();
             db.songDao().insertAll(songs);
 
-            requireActivity().runOnUiThread(() -> {
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
                 allSongs = songs;
                 updateSongList(allSongs);
                 progressBar.setVisibility(View.GONE);
@@ -164,19 +190,18 @@ public class HomeFragment extends Fragment {
             List<Song> latest = SongUtils.getLatestSongs(songs);
             List<Song> fav = SongUtils.getFavoriteList(context);
 
-            requireActivity().runOnUiThread(() -> {
-                hotSongs = top;
-                newSongs = latest;
-                favoriteSongs = fav;
+            if (getActivity() == null || !isAdded()) return;
+            getActivity().runOnUiThread(() -> {
+                hotSongs.clear();
+                hotSongs.addAll(top);
+                newSongs.clear();
+                newSongs.addAll(latest);
+                favoriteSongs.clear();
+                favoriteSongs.addAll(fav);
 
-                recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-                recyclerHotSongs.setAdapter(new HorizontalSongAdapter(hotSongs, context));
-
-                recyclerLatestSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-                recyclerLatestSongs.setAdapter(new HorizontalSongAdapter(newSongs, context));
-
-                recyclerFavoriteSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-                recyclerFavoriteSongs.setAdapter(new HorizontalSongAdapter(favoriteSongs, context));
+                if (hotAdapter != null) hotAdapter.notifyDataSetChanged();
+                if (latestAdapter != null) latestAdapter.notifyDataSetChanged();
+                if (favoriteAdapter != null) favoriteAdapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.GONE);
             });
         }).start();

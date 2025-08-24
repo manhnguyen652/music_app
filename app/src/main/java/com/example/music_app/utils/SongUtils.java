@@ -115,6 +115,8 @@ public class SongUtils {
             URL url = new URL("https://api.deezer.com/search?q=nhac%20tre&output=json");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(10000);
             connection.connect();
 
             InputStream inputStream = connection.getInputStream();
@@ -140,6 +142,9 @@ public class SongUtils {
                 songList.add(song);
             }
 
+            reader.close();
+            inputStream.close();
+            connection.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -160,6 +165,8 @@ public class SongUtils {
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(10000);
             connection.connect();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -185,6 +192,8 @@ public class SongUtils {
                 song.setImgUrl(image); // Nếu bạn có trường ảnh
                 songList.add(song);
             }
+            reader.close();
+            connection.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
         }
