@@ -2,7 +2,6 @@ package com.example.music_app.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +15,8 @@ import com.bumptech.glide.Glide;
 import com.example.music_app.PlayerActivity;
 import com.example.music_app.R;
 import com.example.music_app.entity.Song;
-import com.example.music_app.utils.SongUtils;
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.List;
 
 public class HorizontalSongAdapter extends RecyclerView.Adapter<HorizontalSongAdapter.ViewHolder> {
@@ -43,17 +40,10 @@ public class HorizontalSongAdapter extends RecyclerView.Adapter<HorizontalSongAd
         Song song = songList.get(position);
         holder.tvTitle.setText(song.getTitle());
 
-        byte[] coverBytes = null;
-        try {
-            coverBytes = SongUtils.getSongCoverBytes(song.getPath());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (coverBytes != null) {
+        String imageUrl = song.getImgUrl();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(context)
-                    .asBitmap()
-                    .load(coverBytes)
+                    .load(imageUrl)
                     .placeholder(R.drawable.default_cover)
                     .error(R.drawable.default_cover)
                     .into(holder.imgCover);
