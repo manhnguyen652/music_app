@@ -24,6 +24,7 @@ import com.example.music_app.R;
 import com.example.music_app.entity.Song;
 import com.example.music_app.utils.SongUtils;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class HomeFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
         btnOnline = view.findViewById(R.id.btnOnline);
         btnOffline = view.findViewById(R.id.btnOffline);
+        FloatingActionButton fabEmotionDj = view.findViewById(R.id.fabEmotionDj);
 
         // Init RecyclerViews once
         recyclerHotSongs.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
@@ -101,6 +103,33 @@ public class HomeFragment extends Fragment {
                 Snackbar.make(view, "Đang tải nhạc online...", Snackbar.LENGTH_SHORT).show();
                 loadSongsFromApi();
             }
+        });
+
+        fabEmotionDj.setOnClickListener(v -> {
+            EmotionDjDialogFragment dialog = new EmotionDjDialogFragment();
+            dialog.setOnEmotionSelectedListener(emotion -> {
+                progressBar.setVisibility(View.VISIBLE);
+                new Thread(() -> {
+                    List<Song> mixed = SongUtils.getSongsForEmotion(emotion);
+                    if (mixed != null && !mixed.isEmpty()) {
+                        AppDatabase db = AppDatabase.getInstance(context);
+                        db.songDao().deleteAll();
+                        db.songDao().insertAll(mixed);
+                        allSongs = mixed;
+                    }
+                    if (getActivity() == null || !isAdded()) return;
+                    getActivity().runOnUiThread(() -> {
+                        if (mixed == null || mixed.isEmpty()) {
+                            Snackbar.make(view, "Không tìm thấy bài phù hợp", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Snackbar.make(view, "AI DJ đã mix playlist theo cảm xúc!", Snackbar.LENGTH_SHORT).show();
+                            updateSongList(allSongs);
+                        }
+                        progressBar.setVisibility(View.GONE);
+                    });
+                }).start();
+            });
+            dialog.show(getParentFragmentManager(), "EmotionDjDialogFragment");
         });
 
         return view;

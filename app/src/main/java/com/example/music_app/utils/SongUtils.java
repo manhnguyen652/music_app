@@ -201,6 +201,66 @@ public class SongUtils {
         return songList;
     }
 
+    public static List<Song> getSongsForEmotion(String emotion) {
+        // Map a few common Vietnamese emotion keywords to Jamendo fuzzytags or search terms
+        String tag = "chill";
+        String lower = emotion == null ? "" : emotion.toLowerCase();
+        if (lower.contains("vui") || lower.contains("happy") || lower.contains("😄")) tag = "happy";
+        else if (lower.contains("buồn") || lower.contains("sad") || lower.contains("😢")) tag = "sad";
+        else if (lower.contains("năng lượng") || lower.contains("hừng hực") || lower.contains("🔥") || lower.contains("workout")) tag = "energetic";
+        else if (lower.contains("thư giãn") || lower.contains("🧘") || lower.contains("relax")) tag = "chill";
+        else if (lower.contains("tập trung") || lower.contains("focus") || lower.contains("🚀")) tag = "focus";
+        else if (lower.contains("lãng mạn") || lower.contains("romance") || lower.contains("❤️")) tag = "romance";
+
+        List<Song> songList = new ArrayList<>();
+        String clientId = "99d59977";
+
+        try {
+            String apiUrl = "https://api.jamendo.com/v3.0/tracks/?" +
+                    "client_id=" + clientId +
+                    "&format=json&limit=30&fuzzytags=" + tag +
+                    "&audioformat=mp32";
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(10000);
+            connection.connect();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+
+            JSONObject jsonResponse = new JSONObject(jsonBuilder.toString());
+            JSONArray dataArray = jsonResponse.getJSONArray("results");
+
+            for (int i = 0; i < dataArray.length(); i++) {
+                JSONObject item = dataArray.getJSONObject(i);
+
+                String title = item.getString("name");
+                String artist = item.getString("artist_name");
+                String audio = item.getString("audio");
+                String image = item.getString("album_image");
+                int duration = item.getInt("duration");
+
+                Song song = new Song(audio, title, artist, duration, false, 0);
+                song.setImgUrl(image);
+                songList.add(song);
+            }
+
+            reader.close();
+            connection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return songList;
+    }
+
 
 }
 

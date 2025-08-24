@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bạn đang cảm thấy thế nào?"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginBottom="12dp" />
+
+    <LinearLayout
+        android:id="@+id/emojiRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/emoji_happy"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="😄 Vui"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/emoji_sad"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="😢 Buồn"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/emoji_energetic"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="🔥 Năng lượng"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/emojiRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:id="@+id/emoji_relax"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="🧘 Thư giãn"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/emoji_focus"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="🚀 Tập trung"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/emoji_romance"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="❤️ Lãng mạn"
+            android:background="@drawable/bg_emoji_chip"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/etEmotion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Hãy mô tả cảm xúc của bạn..."
+        android:inputType="textCapSentences"
+        android:layout_marginBottom="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy" />
+
+        <Button
+            android:id="@+id/btnMix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mix ngay"
+            android:layout_marginStart="12dp" />
+    </LinearLayout>
+
+</LinearLayout>
