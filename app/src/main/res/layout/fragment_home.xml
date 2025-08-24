@@ -131,4 +131,13 @@
         android:visibility="gone"
         android:layout_marginTop="24dp"
         style="?android:attr/progressBarStyleLarge" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabEmotionDj"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="AI DJ Cảm Xúc"
+        app:srcCompat="@android:drawable/ic_menu_compass" />
 </FrameLayout>
